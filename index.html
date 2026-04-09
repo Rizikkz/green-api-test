@@ -6,43 +6,54 @@
   <title>GREEN-API Test</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
       color: #1f2937;
     }
+
     .page {
       max-width: 1100px;
       margin: 30px auto;
       padding: 20px;
     }
+
     h1 {
       margin: 0 0 8px;
       font-size: 28px;
     }
+
     .subtitle {
       margin: 0 0 24px;
       color: #6b7280;
       font-size: 14px;
     }
+
     .layout {
       display: grid;
       grid-template-columns: 420px 1fr;
       gap: 20px;
     }
+
     .card {
       background: #ffffff;
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
+
     .section-title {
       font-size: 16px;
       margin: 0 0 14px;
       font-weight: 700;
     }
-    .group { margin-bottom: 18px; }
+
+    .group {
+      margin-bottom: 18px;
+    }
+
     label {
       display: block;
       font-size: 13px;
@@ -50,26 +61,35 @@
       color: #374151;
       font-weight: 600;
     }
-    input, textarea, button {
+
+    input,
+    textarea,
+    button {
       width: 100%;
       font: inherit;
       border-radius: 10px;
     }
-    input, textarea {
+
+    input,
+    textarea {
       border: 1px solid #d1d5db;
       padding: 12px 14px;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
       background: #fff;
     }
-    input:focus, textarea:focus {
+
+    input:focus,
+    textarea:focus {
       border-color: #22c55e;
       box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
     }
+
     textarea {
       resize: vertical;
       min-height: 100px;
     }
+
     button {
       border: none;
       background: #16a34a;
@@ -80,14 +100,23 @@
       transition: transform 0.15s, opacity 0.15s;
       margin-top: 10px;
     }
-    button:hover { opacity: 0.95; }
-    button:active { transform: translateY(1px); }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
     button.secondary {
       background: #2563eb;
     }
+
     button.gray {
       background: #4b5563;
     }
+
     .response-box {
       min-height: 620px;
       width: 100%;
@@ -103,6 +132,7 @@
       overflow-wrap: anywhere;
       overflow: auto;
     }
+
     .status {
       display: inline-block;
       margin-bottom: 12px;
@@ -113,26 +143,36 @@
       font-size: 13px;
       font-weight: 700;
     }
+
     .hint {
       font-size: 12px;
       color: #6b7280;
       margin-top: 6px;
     }
+
     @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-      .response-box { min-height: 300px; }
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .response-box {
+        min-height: 300px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page">
     <h1>GREEN-API Test Page</h1>
-    <p class="subtitle">Страница для вызова методов getSettings, getStateInstance, sendMessage и sendFileByUrl.</p>
+    <p class="subtitle">
+      Страница для вызова методов getSettings, getStateInstance, sendMessage и sendFileByUrl.
+    </p>
 
     <div class="layout">
       <div class="card">
         <div class="group">
           <div class="section-title">Параметры подключения</div>
+
           <label for="idInstance">idInstance</label>
           <input id="idInstance" type="text" placeholder="Введите idInstance" />
 
@@ -145,6 +185,7 @@
 
         <div class="group">
           <div class="section-title">Отправка сообщения</div>
+
           <label for="phoneMessage">Телефон</label>
           <input id="phoneMessage" type="text" placeholder="77771234567" />
           <div class="hint">Номер указывай без +. Скрипт сам добавит формат chatId.</div>
@@ -157,6 +198,7 @@
 
         <div class="group">
           <div class="section-title">Отправка файла по ссылке</div>
+
           <label for="phoneFile">Телефон</label>
           <input id="phoneFile" type="text" placeholder="77771234567" />
 
@@ -171,125 +213,144 @@
       <div class="card">
         <div class="section-title">Ответ API</div>
         <div id="status" class="status">Готово к работе</div>
-        <div id="response" class="response-box">Здесь появится ответ от GREEN-API...</div>
+        <textarea id="response" class="response-box" readonly>Здесь появится ответ от GREEN-API...</textarea>
       </div>
     </div>
   </div>
 
-  <script src="https://unpkg.com/@green-api/whatsapp-api-client/lib/whatsapp-api-client.min.js"></script>
   <script>
     function setStatus(text) {
       document.getElementById('status').textContent = text;
     }
-  
+
     function showResponse(data) {
       const responseBox = document.getElementById('response');
-      if (typeof data === 'string') {
-        responseBox.textContent = data;
-        return;
-      }
-      responseBox.textContent = JSON.stringify(data, null, 2);
+      const formatted = typeof data === 'string'
+        ? data
+        : JSON.stringify(data, null, 2);
+
+      responseBox.value = formatted;
     }
-  
+
     function getCredentials() {
       const idInstance = document.getElementById('idInstance').value.trim();
-      const apiTokenInstance = document.getElementById('apiToken').value.trim();
-  
-      if (!idInstance || !apiTokenInstance) {
+      const apiToken = document.getElementById('apiToken').value.trim();
+
+      if (!idInstance || !apiToken) {
         throw new Error('Сначала заполни idInstance и ApiTokenInstance.');
       }
-  
-      return { idInstance, apiTokenInstance };
+
+      return { idInstance, apiToken };
     }
-  
-    function getRestApi() {
-      const { idInstance, apiTokenInstance } = getCredentials();
-      return whatsAppClient.restAPI({
-        idInstance,
-        apiTokenInstance
-      });
-    }
-  
+
     function normalizePhone(phone) {
       const cleanPhone = phone.replace(/\D/g, '');
+
       if (!cleanPhone) {
         throw new Error('Нужно указать номер телефона.');
       }
+
       return cleanPhone + '@c.us';
     }
-  
-    async function runMethod(methodName, callback) {
+
+    async function callApi(method, body = null) {
       try {
+        const { idInstance, apiToken } = getCredentials();
+        const url = `https://api.green-api.com/waInstance${idInstance}/${method}/${apiToken}`;
+
         setStatus('Отправка запроса...');
         showResponse('Подожди, выполняется запрос...');
-  
-        const restAPI = getRestApi();
-        const data = await callback(restAPI);
-  
+
+        const options = {
+          method: body ? 'POST' : 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        if (body) {
+          options.body = JSON.stringify(body);
+        }
+
+        const response = await fetch(url, options);
+        const text = await response.text();
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+
         showResponse({
-          method: methodName,
+          httpStatus: response.status,
+          httpOk: response.ok,
+          method: method,
+          requestBody: body,
           response: data
         });
-  
-        setStatus('Успешно');
+
+        setStatus(response.ok ? 'Успешно' : 'Ошибка ответа API');
       } catch (error) {
         setStatus('Ошибка');
         showResponse({
-          error: error.message || String(error)
+          error: error.message
         });
       }
     }
-  
+
     function getSettings() {
-      runMethod('getSettings', (restAPI) => restAPI.settings.getSettings());
+      callApi('getSettings');
     }
-  
+
     function getStateInstance() {
-      runMethod('getStateInstance', (restAPI) => restAPI.instance.getStateInstance());
+      callApi('getStateInstance');
     }
-  
+
     function sendMessage() {
       try {
         const phone = document.getElementById('phoneMessage').value.trim();
         const message = document.getElementById('messageText').value.trim();
-  
+
         if (!message) {
           throw new Error('Введите текст сообщения.');
         }
-  
-        runMethod('sendMessage', (restAPI) =>
-          restAPI.message.sendMessage(normalizePhone(phone), null, message)
-        );
+
+        callApi('sendMessage', {
+          chatId: normalizePhone(phone),
+          message: message
+        });
       } catch (error) {
         setStatus('Ошибка');
-        showResponse({ error: error.message });
+        showResponse({
+          error: error.message
+        });
       }
     }
-  
+
     function sendFileByUrl() {
       try {
         const phone = document.getElementById('phoneFile').value.trim();
         const fileUrl = document.getElementById('fileUrl').value.trim();
-  
+
         if (!fileUrl) {
           throw new Error('Введите URL файла.');
         }
-  
+
         const fileName = fileUrl.split('/').pop() || 'file';
-        const caption = 'Файл по ссылке';
-  
-        runMethod('sendFileByUrl', (restAPI) =>
-          restAPI.file.sendFileByUrl(
-            normalizePhone(phone),
-            null,
-            fileUrl,
-            fileName,
-            caption
-          )
-        );
+
+        callApi('sendFileByUrl', {
+          chatId: normalizePhone(phone),
+          urlFile: fileUrl,
+          fileName: fileName
+        });
       } catch (error) {
         setStatus('Ошибка');
-        showResponse({ error: error.message });
+        showResponse({
+          error: error.message
+        });
       }
     }
   </script>
+</body>
+</html>
