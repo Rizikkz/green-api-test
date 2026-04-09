@@ -181,7 +181,7 @@
     function setStatus(text) {
       document.getElementById('status').textContent = text;
     }
-
+  
     function showResponse(data) {
       const responseBox = document.getElementById('response');
       if (typeof data === 'string') {
@@ -190,18 +190,18 @@
       }
       responseBox.textContent = JSON.stringify(data, null, 2);
     }
-
+  
     function getCredentials() {
       const idInstance = document.getElementById('idInstance').value.trim();
       const apiTokenInstance = document.getElementById('apiToken').value.trim();
-
+  
       if (!idInstance || !apiTokenInstance) {
         throw new Error('Сначала заполни idInstance и ApiTokenInstance.');
       }
-
+  
       return { idInstance, apiTokenInstance };
     }
-
+  
     function getRestApi() {
       const { idInstance, apiTokenInstance } = getCredentials();
       return whatsAppClient.restAPI({
@@ -209,7 +209,7 @@
         apiTokenInstance
       });
     }
-
+  
     function normalizePhone(phone) {
       const cleanPhone = phone.replace(/\D/g, '');
       if (!cleanPhone) {
@@ -217,20 +217,20 @@
       }
       return cleanPhone + '@c.us';
     }
-
+  
     async function runMethod(methodName, callback) {
       try {
         setStatus('Отправка запроса...');
         showResponse('Подожди, выполняется запрос...');
-
+  
         const restAPI = getRestApi();
         const data = await callback(restAPI);
-
+  
         showResponse({
           method: methodName,
           response: data
         });
-
+  
         setStatus('Успешно');
       } catch (error) {
         setStatus('Ошибка');
@@ -239,24 +239,24 @@
         });
       }
     }
-
+  
     function getSettings() {
-      runMethod('getSettings', (restAPI) => restAPI.account.getSettings());
+      runMethod('getSettings', (restAPI) => restAPI.settings.getSettings());
     }
-
+  
     function getStateInstance() {
-      runMethod('getStateInstance', (restAPI) => restAPI.account.getStateInstance());
+      runMethod('getStateInstance', (restAPI) => restAPI.instance.getStateInstance());
     }
-
+  
     function sendMessage() {
       try {
         const phone = document.getElementById('phoneMessage').value.trim();
         const message = document.getElementById('messageText').value.trim();
-
+  
         if (!message) {
           throw new Error('Введите текст сообщения.');
         }
-
+  
         runMethod('sendMessage', (restAPI) =>
           restAPI.message.sendMessage(normalizePhone(phone), null, message)
         );
@@ -265,20 +265,27 @@
         showResponse({ error: error.message });
       }
     }
-
+  
     function sendFileByUrl() {
       try {
         const phone = document.getElementById('phoneFile').value.trim();
         const fileUrl = document.getElementById('fileUrl').value.trim();
-
+  
         if (!fileUrl) {
           throw new Error('Введите URL файла.');
         }
-
+  
         const fileName = fileUrl.split('/').pop() || 'file';
-
+        const caption = 'Файл по ссылке';
+  
         runMethod('sendFileByUrl', (restAPI) =>
-          restAPI.file.sendFileByUrl(normalizePhone(phone), null, fileName, fileUrl)
+          restAPI.file.sendFileByUrl(
+            normalizePhone(phone),
+            null,
+            fileUrl,
+            fileName,
+            caption
+          )
         );
       } catch (error) {
         setStatus('Ошибка');
@@ -286,5 +293,3 @@
       }
     }
   </script>
-</body>
-</html>
