@@ -256,23 +256,22 @@
     async function callApi(method, body = null) {
       try {
         const { idInstance, apiToken } = getCredentials();
-        const url = `https://api.green-api.com/waInstance${idInstance}/${method}/${apiToken}`;
 
         setStatus('Отправка запроса...');
         showResponse('Подожди, выполняется запрос...');
 
-        const options = {
-          method: body ? 'POST' : 'GET',
+        const response = await fetch(`http://127.0.0.1:3000/api/${method}`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }
-        };
+          },
+          body: JSON.stringify({
+            idInstance,
+            apiToken,
+            body
+          })
+        });
 
-        if (body) {
-          options.body = JSON.stringify(body);
-        }
-
-        const response = await fetch(url, options);
         const text = await response.text();
 
         let data;
@@ -282,14 +281,7 @@
           data = text;
         }
 
-        showResponse({
-          httpStatus: response.status,
-          httpOk: response.ok,
-          method: method,
-          requestBody: body,
-          response: data
-        });
-
+        showResponse(data);
         setStatus(response.ok ? 'Успешно' : 'Ошибка ответа API');
       } catch (error) {
         setStatus('Ошибка');
